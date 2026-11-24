@@ -1,0 +1,9 @@
+export const POSTGRES_IMAGE = 'postgres:18';
+export const TEMPLATE_DATABASE = 'squint_template';
+export const TEST_POSTGRES_URL = 'SQUINT_TEST_POSTGRES_URL';
+export const ORIGIN = 'https://squint.futo.org';
+export const WEBHOOK_SECRET = 'webhook-secret';
+export const S3_IMAGE = 'rustfs/rustfs:1.0.6';
+export const TEST_S3_ENDPOINT = 'SQUINT_TEST_S3_ENDPOINT';
+export const S3_ACCESS_KEY_ID = 'squint';
+export const S3_SECRET_ACCESS_KEY = 'squint-secret';

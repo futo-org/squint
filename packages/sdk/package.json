@@ -1,0 +1,37 @@
+{
+  "name": "@futo-org/squint-sdk",
+  "description": "Auto-generated TypeScript SDK for the Squint API",
+  "version": "0.0.1",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/futo-org/squint.git",
+    "directory": "packages/sdk"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm generate && tsc",
+    "check": "tsc --noEmit",
+    "sync": "pnpm generate",
+    "generate": "oazapfts --optimistic --argumentStyle=object --useEnumType --allSchemas ../../open-api/squint-openapi-specs.json src/fetch-client.ts"
+  },
+  "dependencies": {
+    "@oazapfts/runtime": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "oazapfts": "7.5.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
+  }
+}

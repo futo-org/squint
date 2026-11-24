@@ -1,0 +1,30 @@
+packages:
+  - server
+  - web
+  - packages/*
+
+dedupePeerDependents: true
+
+allowBuilds:
+  '@nestjs/core': false
+  '@scarf/scarf': false
+  '@swc/core': false
+  '@tailwindcss/oxide': true
+  cpu-features: false
+  esbuild: true
+  protobufjs: false
+  ssh2: false
+
+preferWorkspacePackages: true
+
+shamefullyHoist: false
+
+verifyDepsBeforeRun: install
+
+packageExtensions:
+  nestjs-kysely:
+    dependencies:
+      tslib: '*'
+
+minimumReleaseAgeExclude:
+  - '@immich/ui@0.94.0'

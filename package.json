@@ -1,0 +1,41 @@
+{
+  "name": "squint",
+  "version": "0.0.1",
+  "license": "SEE LICENSE IN LICENSE",
+  "description": "Visual regression review for screenshot tests",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.20.0",
+  "engines": {
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "pnpm build:packages && pnpm --filter squint-server build && pnpm --filter squint-web build",
+    "build:packages": "pnpm --filter \"./packages/**\" build",
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "pnpm lint --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "sync": "pnpm -r sync",
+    "check": "pnpm -r check",
+    "test": "pnpm -r test",
+    "test:medium": "pnpm -r test:medium"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-better-tailwindcss": "^4.5.0",
+    "eslint-plugin-svelte": "^3.12.5",
+    "eslint-plugin-unicorn": "^79.0.0",
+    "globals": "^17.3.0",
+    "jiti": "^2.6.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-svelte": "^4.0.0",
+    "svelte": "^5.42.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8.56.0"
+  }
+}

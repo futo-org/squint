@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+@import '@immich/ui/theme/default.css';
+@source '../../node_modules/@immich/ui/dist';
+
+@custom-variant dark (&:where(.dark, .dark *):not(.light));
+
+@layer base {
+  :root {
+    --immich-primary: 66 80 175;
+    --chart-series: #2a78d6;
+  }
+
+  :root.dark {
+    --chart-series: #3987e5;
+  }
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  src: url('./assets/fonts/GoogleSans.ttf') format('truetype-variations');
+  font-weight: 1 999;
+  font-style: normal;
+  ascent-override: 100%;
+}
+
+.text-muted {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.border-muted {
+  @apply border-gray-600 dark:border-gray-400;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+:root:not(.dark) {
+  color-scheme: light;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+  font-size: 17px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Google Sans',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}

@@ -1,0 +1,44 @@
+name: Docker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build and Push
+    uses: immich-app/devtools/.github/workflows/multi-runner-build.yml@4d420cf8e5ea499f99b2c2849ff9a219d5f7b178 # multi-runner-build-workflow-v4.0.0
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    with:
+      image: squint
+      context: .
+      dockerfile: Dockerfile
+      tags: |
+        type=ref,event=branch
+        type=ref,event=pr
+        type=sha,format=long,prefix=commit-
+        type=semver,pattern={{version}},prefix=v
+
+  success-check:
+    name: Docker Build & Push Success
+    needs: [build]
+    permissions: {}
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: immich-app/devtools/actions/success-check@81113db03f6d743efee81e0058c0b43f6cd6f36d # success-check-action-v0.0.6
+        with:
+          needs: ${{ toJSON(needs) }}
