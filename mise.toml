@@ -7,22 +7,19 @@ lockfile = true
 lockfile_platforms = ["linux-arm64", "linux-x64", "macos-arm64", "macos-x64"]
 
 [tasks.version]
-description = "Set the version and add its release notes from the commits since the last version"
+description = "Add the release notes for a version from the commits since the last version"
 usage = '''
 arg "<version>"
 flag "--dry-run" help="Print the release notes and change nothing"
 '''
 run = '''
 set -e
-constants="server/src/constants.ts"
 notes="server/src/resources/release-notes.json"
-grep -q "Version: '[0-9.]*' as string" "$constants"
 pnpm --filter squint-server build
 if [ "{{usage.dry_run}}" = "true" ]; then
   node server/dist/bin/release-notes.js --next {{usage.version}}
   exit 0
 fi
-sed -i "s/Version: '[0-9.]*' as string/Version: '{{usage.version}}' as string/" "$constants"
 node server/dist/bin/release-notes.js --next {{usage.version}} --out "$notes"
 pnpm exec prettier --write "$notes"
 '''
