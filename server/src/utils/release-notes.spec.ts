@@ -22,6 +22,12 @@ describe(toRelease.name, () => {
     });
   });
 
+  it('stops at a squash-merged version commit', () => {
+    const commits = [newCommit('feat: review inbox'), newCommit('chore: version 0.1.0 (#12)'), newCommit('feat: old')];
+
+    expect(toRelease(commits, '0.2.0')?.notes).toEqual([{ kind: ReleaseNoteKind.Feature, text: 'Review inbox' }]);
+  });
+
   it('collects everything when there is no earlier version', () => {
     const commits = [newCommit('feat: dashboard'), newCommit('feat: squint app')];
 
