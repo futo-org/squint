@@ -13,7 +13,12 @@ export const toRelease = (commits: Commit[], version: string): Release | undefin
   const notes = new Map<string, ReleaseNote>();
   let date = '';
   for (const commit of commits) {
-    if (VersionCommit.test(commit.subject)) {
+    const [, released] = VersionCommit.exec(commit.subject) ?? [];
+    if (released === version) {
+      continue;
+    }
+
+    if (released) {
       break;
     }
 

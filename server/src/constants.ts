@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module';
 import { ReleaseNoteKind, UserRole } from 'src/enum.js';
 
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
@@ -5,7 +6,7 @@ const OAUTH_STATE_MAX_AGE_SECONDS = 5 * 60;
 
 export const Constants = {
   App: {
-    Version: '0.0.1' as string,
+    Version: (createRequire(import.meta.url)('../package.json') as { version: string }).version,
     RepositoryUrl: 'https://github.com/futo-org/squint',
   },
   Release: {
@@ -15,7 +16,7 @@ export const Constants = {
       ['perf', ReleaseNoteKind.Fix],
     ]),
     ConventionalSubject: /^(\w+)(?:\([^)]*\))?!?:\s*(.+)$/,
-    VersionCommit: /^chore: version \d+\.\d+\.\d+$/,
+    VersionCommit: /^chore: version (\d+\.\d+\.\d+)(?: \(#\d+\))?$/,
     GitLogMaxBytes: 256 * 1024 * 1024,
     GitLogRecordSeparator: '\u{1E}',
   },
