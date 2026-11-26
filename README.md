@@ -122,10 +122,12 @@ A build that has been in the trash for 30 days is deleted. Its screenshots are d
 
 ## Releases
 
-The version lives in `server/src/constants.ts`. To cut a release, set it and generate the release notes from the `feat`, `fix` and `perf` commits since the last version, then commit the result as `chore: version <version>`:
+Releases come from release-please. It keeps a pull request titled `chore: version X.Y.Z` up to date with the next version, the changelog and the release notes generated from the `feat`, `fix` and `perf` commits since the last version. Merging it publishes the GitHub release, which builds the image and publishes the CLI.
+
+To preview the release notes for a version:
 
 ```
-mise run version 0.2.0
+mise run version 0.2.0 --dry-run
 ```
 
 The What's new dialog shows those notes. The About dialog shows the version, and the commit and date the image was built from (`BUILD_SOURCE_COMMIT` and `BUILD_DATE` build arguments).

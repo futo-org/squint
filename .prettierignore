@@ -4,3 +4,4 @@ build/
 .svelte-kit/
 packages/sdk/src/fetch-client.ts
 open-api/
+CHANGELOG.md
