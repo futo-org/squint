@@ -1,6 +1,7 @@
 import { Module, type OnModuleInit } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { KyselyModule } from 'nestjs-kysely';
+import { registerSchemas } from '@immich/nestjs-standard-schema';
 import { controllers } from 'src/controllers/index.js';
 import { EventGateway } from 'src/gateways/event.gateway.js';
 import { AuthGuard } from 'src/middleware/auth.guard.js';
@@ -11,7 +12,6 @@ import { repositories } from 'src/repositories/index.js';
 import { DatabaseService } from 'src/services/database.service.js';
 import { services } from 'src/services/index.js';
 import { getKyselyConfig } from 'src/utils/database.js';
-import { registerSchemas } from 'src/zod.js';
 
 @Module({
   imports: [

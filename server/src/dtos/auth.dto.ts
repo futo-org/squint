@@ -1,6 +1,6 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import type { UserResponseDto } from 'src/dtos/user.dto.js';
-import { createZodDto } from 'src/zod.js';
 
 const LoginQuerySchema = z.object({ returnTo: z.string().optional() });
 
