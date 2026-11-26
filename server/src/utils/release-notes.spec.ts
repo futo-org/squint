@@ -28,6 +28,12 @@ describe(toRelease.name, () => {
     expect(toRelease(commits, '0.2.0')?.notes).toEqual([{ kind: ReleaseNoteKind.Feature, text: 'Review inbox' }]);
   });
 
+  it('skips the version commit of the release being generated', () => {
+    const commits = [newCommit('chore: version 0.2.0'), newCommit('feat: inbox'), newCommit('chore: version 0.1.0')];
+
+    expect(toRelease(commits, '0.2.0')?.notes).toEqual([{ kind: ReleaseNoteKind.Feature, text: 'Inbox' }]);
+  });
+
   it('collects everything when there is no earlier version', () => {
     const commits = [newCommit('feat: dashboard'), newCommit('feat: squint app')];
 

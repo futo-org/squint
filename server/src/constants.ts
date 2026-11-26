@@ -16,7 +16,7 @@ export const Constants = {
       ['perf', ReleaseNoteKind.Fix],
     ]),
     ConventionalSubject: /^(\w+)(?:\([^)]*\))?!?:\s*(.+)$/,
-    VersionCommit: /^chore: version \d+\.\d+\.\d+(?: \(#\d+\))?$/,
+    VersionCommit: /^chore: version (\d+\.\d+\.\d+)(?: \(#\d+\))?$/,
     GitLogMaxBytes: 256 * 1024 * 1024,
     GitLogRecordSeparator: '\u{1E}',
   },
