@@ -1,6 +1,6 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { isoDatetimeToDate, SearchQuerySchema } from 'src/validation.js';
-import { createZodDto } from 'src/zod.js';
 
 const ProjectSearchSchema = z.object({
   id: z.uuid().optional(),

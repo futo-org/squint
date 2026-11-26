@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { patchOpenApiParameters, toOpenApiSchema } from '@immich/nestjs-standard-schema';
 import { Constants } from 'src/constants.js';
-import { patchOpenApiParameters, toOpenApiSchema } from 'src/zod.js';
 
 export const createOpenApiDocument = (app: INestApplication): OpenAPIObject => {
   const { Api, Cookies } = Constants;

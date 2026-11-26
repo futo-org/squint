@@ -1,5 +1,5 @@
 import z from 'zod';
-import { createZodDto } from 'src/zod.js';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 
 const DashboardHistoryResponseSchema = z
   .object({ projectId: z.uuid(), date: z.iso.date(), screenshotCount: z.int() })

@@ -1,8 +1,8 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { Constants } from 'src/constants.js';
 import { BuildKind, BuildStatus, PullRequestState, ReviewStatus, ScreenshotStatus, ScreenshotTheme } from 'src/enum.js';
 import { isoDatetimeToDate, SearchQuerySchema, Sha256Schema, stringToBool } from 'src/validation.js';
-import { createZodDto } from 'src/zod.js';
 
 const BuildKindSchema = z.enum(BuildKind).meta({ id: 'BuildKind' });
 const BuildStatusSchema = z.enum(BuildStatus).meta({ id: 'BuildStatus' });

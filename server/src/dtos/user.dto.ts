@@ -1,6 +1,6 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { UserRole } from 'src/enum.js';
-import { createZodDto } from 'src/zod.js';
 
 const UserRoleSchema = z.enum(UserRole).meta({ id: 'UserRole' });
 

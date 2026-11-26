@@ -7,6 +7,7 @@ import { createPostgres } from '@immich/sql-tools';
 import { Kysely } from 'kysely';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { type Mock, vi } from 'vitest';
+import { registerSchemas } from '@immich/nestjs-standard-schema';
 import { configureApp } from 'src/app.common.js';
 import type { CiAuthDto } from 'src/dtos/auth.dto.js';
 import { AuthGuard } from 'src/middleware/auth.guard.js';
@@ -17,7 +18,6 @@ import { LoggingRepository } from 'src/repositories/logging.repository.js';
 import type { DB } from 'src/schema/index.js';
 import { AuthService } from 'src/services/auth.service.js';
 import { getKyselyConfig } from 'src/utils/database.js';
-import { registerSchemas } from 'src/zod.js';
 import {
   S3_ACCESS_KEY_ID,
   S3_SECRET_ACCESS_KEY,

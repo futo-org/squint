@@ -1,6 +1,6 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { Sha256Schema } from 'src/validation.js';
-import { createZodDto } from 'src/zod.js';
 
 const BlobParamSchema = z.object({ sha256: Sha256Schema });
 

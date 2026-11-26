@@ -1,7 +1,7 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { ReleaseNoteKind } from 'src/enum.js';
 import { isoDatetimeToDate } from 'src/validation.js';
-import { createZodDto } from 'src/zod.js';
 
 const ReleaseNoteKindSchema = z.enum(ReleaseNoteKind).meta({ id: 'ReleaseNoteKind' });
 

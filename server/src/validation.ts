@@ -1,6 +1,6 @@
 import z from 'zod';
+import { createZodDto } from '@immich/nestjs-standard-schema/zod';
 import { Constants } from 'src/constants.js';
-import { createZodDto } from 'src/zod.js';
 
 export const isoDatetimeToDate = z
   .codec(z.iso.datetime({ offset: true }), z.date(), {
