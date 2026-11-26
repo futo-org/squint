@@ -7,7 +7,7 @@
   "scripts": {
     "build": "nest build && pnpm open-api && pnpm --filter @futo-org/squint-sdk generate",
     "start": "node dist/main.js",
-    "start:dev": "nest start --watch --",
+    "start:dev": "SQUINT_ENV=development nest start --watch --",
     "check": "tsc --noEmit && sql-tools migrations verify-order",
     "test": "vitest --config test/vitest.config.mjs",
     "test:medium": "vitest --config test/vitest.config.medium.mjs",

@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import request from 'supertest';
 import { ServerController } from 'src/controllers/server.controller.js';
 import { UserRole } from 'src/enum.js';
@@ -18,16 +19,29 @@ const auth = {
 
 describe(GlobalExceptionFilter.name, () => {
   const service = { getAbout: vi.fn() };
+  const reported: Sentry.ErrorEvent[] = [];
   let ctx: ControllerContext;
 
   beforeAll(async () => {
+    Sentry.init({
+      dsn: 'https://key@sentry.invalid/1',
+      defaultIntegrations: false,
+      beforeSend: (event) => {
+        reported.push(event);
+        return null;
+      },
+    });
     ctx = await controllerSetup(ServerController, [{ provide: ServerService, useValue: service }]);
 
-    return () => ctx.close();
+    return async () => {
+      await ctx.close();
+      await Sentry.close();
+    };
   });
 
   beforeEach(() => {
     vi.resetAllMocks();
+    reported.length = 0;
     ctx.authenticate.mockResolvedValue(auth);
   });
 
@@ -43,7 +57,10 @@ describe(GlobalExceptionFilter.name, () => {
 
     expect(status).toBe(500);
     expect(body).toEqual({ message: 'Internal server error' });
-    expect(ctx.reportError).toHaveBeenCalledWith(error);
+    await Sentry.flush();
+    expect(reported).toMatchObject([
+      { exception: { values: [{ value: 'Database is down', mechanism: { handled: false } }] } },
+    ]);
   });
 
   it.each([
@@ -60,6 +77,7 @@ describe(GlobalExceptionFilter.name, () => {
       .set('cookie', 'squint_access_token=session-token');
 
     expect(response.status).toBe(status);
-    expect(ctx.reportError).not.toHaveBeenCalled();
+    await Sentry.flush();
+    expect(reported).toEqual([]);
   });
 });

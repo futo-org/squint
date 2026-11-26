@@ -1,3 +1,9 @@
+export enum SquintEnvironment {
+  Development = 'development',
+  Testing = 'testing',
+  Production = 'production',
+}
+
 export enum UserRole {
   Approver = 'approver',
   Viewer = 'viewer',

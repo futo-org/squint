@@ -20,6 +20,7 @@ The API reads its settings from the environment and refuses to start when one is
 
 | Variable                                                                     | Default                                                                 |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `SQUINT_ENV`                                                                 | `production`, or `development` or `testing`; tags reported errors       |
 | `SQUINT_DB_URL`                                                              | `postgres://postgres:postgres@localhost:5432/squint`                    |
 | `SQUINT_HOST`, `SQUINT_PORT`                                                 | all interfaces, `3000`                                                  |
 | `SQUINT_WEB_ROOT`                                                            | the web app's `build` folder                                            |
