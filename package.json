@@ -1,6 +1,6 @@
 {
   "name": "squint",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "SEE LICENSE IN LICENSE",
   "description": "Visual regression review for screenshot tests",
   "private": true,
