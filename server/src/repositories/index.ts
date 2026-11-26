@@ -5,6 +5,7 @@ import { CiRepository } from 'src/repositories/ci.repository.js';
 import { ConfigRepository } from 'src/repositories/config.repository.js';
 import { CryptoRepository } from 'src/repositories/crypto.repository.js';
 import { DatabaseRepository } from 'src/repositories/database.repository.js';
+import { ErrorReportingRepository } from 'src/repositories/error-reporting.repository.js';
 import { LoggingRepository } from 'src/repositories/logging.repository.js';
 import { OAuthRepository } from 'src/repositories/oauth.repository.js';
 import { ProjectRepository } from 'src/repositories/project.repository.js';
@@ -24,6 +25,7 @@ export const repositories = [
   ConfigRepository,
   CryptoRepository,
   DatabaseRepository,
+  ErrorReportingRepository,
   LoggingRepository,
   OAuthRepository,
   ProjectRepository,

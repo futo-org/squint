@@ -33,6 +33,7 @@ The API reads its settings from the environment and refuses to start when one is
 | `SQUINT_GITHUB_OIDC_ISSUER`                                                  | `https://token.actions.githubusercontent.com`                           |
 | `SQUINT_GITHUB_WEBHOOK_SECRET`                                               | none, every webhook delivery is refused without it                      |
 | `SQUINT_CI_OWNERS`                                                           | `futo-org,immich-app`, comma separated GitHub owners allowed to publish |
+| `SQUINT_SENTRY_DSN`                                                          | none, errors are reported to this Sentry/GlitchTip DSN when set         |
 
 ## Database
 

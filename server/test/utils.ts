@@ -13,6 +13,7 @@ import { AuthGuard } from 'src/middleware/auth.guard.js';
 import { GlobalExceptionFilter } from 'src/middleware/global-exception.filter.js';
 import { GlobalValidationPipe } from 'src/middleware/global-validation.pipe.js';
 import { ConfigRepository, type EnvData } from 'src/repositories/config.repository.js';
+import { ErrorReportingRepository } from 'src/repositories/error-reporting.repository.js';
 import { LoggingRepository } from 'src/repositories/logging.repository.js';
 import type { DB } from 'src/schema/index.js';
 import { AuthService } from 'src/services/auth.service.js';
@@ -34,6 +35,7 @@ type ControllerClass = new (...args: never[]) => unknown;
 export type ControllerContext = {
   authenticate: Mock;
   authenticateCi: Mock;
+  reportError: Mock;
   getHttpServer: () => ReturnType<NestExpressApplication['getHttpServer']>;
   close: () => Promise<void>;
 };
@@ -67,6 +69,7 @@ export const controllerSetup = async (
   providers: Provider[] = [],
 ): Promise<ControllerContext> => {
   const authService = { authenticate: vi.fn(), authenticateCi: vi.fn() };
+  const errorReporting = { report: vi.fn() };
   registerSchemas({ controllers: [controller] });
   const moduleRef = await Test.createTestingModule({
     controllers: [controller],
@@ -76,6 +79,7 @@ export const controllerSetup = async (
       { provide: APP_GUARD, useClass: AuthGuard },
       { provide: LoggingRepository, useValue: { log: vi.fn(), warn: vi.fn(), error: vi.fn() } },
       { provide: ConfigRepository, useValue: newConfigRepository() },
+      { provide: ErrorReportingRepository, useValue: errorReporting },
       { provide: AuthService, useValue: authService },
       ...providers,
     ],
@@ -89,6 +93,7 @@ export const controllerSetup = async (
   return {
     authenticate: resolved.authenticate,
     authenticateCi: resolved.authenticateCi,
+    reportError: errorReporting.report,
     getHttpServer: () => app.getHttpServer(),
     close: () => app.close(),
   };
