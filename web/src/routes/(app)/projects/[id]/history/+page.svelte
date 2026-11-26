@@ -9,6 +9,9 @@
   import { toSearch } from '#lib/filter.js';
   import { formatDay, formatPercent } from '#lib/format.js';
   import { getTimeline, getVariants } from '#lib/history.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getProjectQuery } from '#lib/queries/project.query.js';
+  import { searchScreenshotVersionsQuery } from '#lib/queries/screen.query.js';
   import { Badge, Button, IconButton, Link, Text } from '@immich/ui';
   import {
     mdiArrowLeft,
@@ -37,11 +40,14 @@
   let mode = $state<Mode>('single');
   let isDiffOn = $state(true);
 
-  const base = $derived(`/projects/${data.project.id}`);
+  const { projectId, name } = $derived(data);
+  const project = createPreloadedQuery(() => getProjectQuery(projectId));
+  const versions = createPreloadedQuery(() => searchScreenshotVersionsQuery({ projectId, name }));
+  const base = $derived(`/projects/${projectId}`);
   const params = $derived(page.url.searchParams);
-  const variants = $derived(getVariants(data.versions));
+  const variants = $derived(getVariants(versions.data));
   const timeline = $derived(
-    getTimeline(data.versions, {
+    getTimeline(versions.data, {
       theme: params.get('theme') ?? Constants.History.DefaultTheme,
       viewport: params.get('viewport') ?? Constants.History.DefaultViewport,
     }),
@@ -58,7 +64,7 @@
   const open = (change: { theme?: string; viewport?: string; version?: string }) => {
     const { theme, viewport } = version;
 
-    return goto(`${base}/history${toSearch({ screen: data.name, theme, viewport, ...change })}`, {
+    return goto(`${base}/history${toSearch({ screen: name, theme, viewport, ...change })}`, {
       replace: true,
       reset: false,
     });
@@ -87,15 +93,15 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
-  <title>{data.name} history - {data.project.name} - Squint</title>
+  <title>{name} history - {project.data.name} - Squint</title>
 </svelte:head>
 
 <BreadcrumbPage
   breadcrumbs={[
     { title: 'Projects', href: '/' },
-    { title: data.project.name, href: base },
+    { title: project.data.name, href: base },
     { title: 'Screens', href: `${base}/screens` },
-    { title: data.name },
+    { title: name },
   ]}
 >
   <div class="flex flex-wrap items-center justify-between gap-3">

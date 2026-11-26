@@ -1,4 +1,6 @@
-import { isHttpError, searchProjects } from '@futo-org/squint-sdk';
+import { queryClient } from '#lib/queries/client.js';
+import { getProjectQuery } from '#lib/queries/project.query.js';
+import { isHttpError } from '@futo-org/squint-sdk';
 import { redirect } from '@sveltejs/kit';
 import { Constants } from './constants.js';
 
@@ -21,9 +23,4 @@ export const findOrRedirect = async <T>(load: () => Promise<T | undefined>, href
   return result;
 };
 
-export const findProjectOrRedirect = (id: string, fetch: typeof globalThis.fetch) =>
-  findOrRedirect(async () => {
-    const [project] = await searchProjects({ id }, { fetch });
-
-    return project;
-  }, '/');
+export const findProjectOrRedirect = (id: string) => findOrRedirect(() => queryClient.query(getProjectQuery(id)), '/');

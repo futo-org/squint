@@ -1,11 +1,11 @@
 import { toProjectFilter } from '#lib/filter.js';
-import { searchProjects } from '@futo-org/squint-sdk';
+import { queryClient } from '#lib/queries/client.js';
+import { searchProjectsQuery } from '#lib/queries/project.query.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch, url }) => {
+export const load = (async ({ url }) => {
   const filter = toProjectFilter(url.searchParams);
-  const [projects, allProjects] = await Promise.all([searchProjects(filter, { fetch }), searchProjects({}, { fetch })]);
-  const repositories = [...new Set(allProjects.map(({ repository }) => repository))];
+  await Promise.all([queryClient.query(searchProjectsQuery(filter)), queryClient.query(searchProjectsQuery())]);
 
-  return { projects, filter, repositories };
+  return { filter };
 }) satisfies PageLoad;

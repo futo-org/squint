@@ -6,6 +6,10 @@
   import { Constants } from '#lib/constants.js';
   import { live } from '#lib/live.svelte.js';
   import AboutModal from '#lib/modals/AboutModal.svelte';
+  import { getInboxCountQuery } from '#lib/queries/build.query.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getServerAboutQuery } from '#lib/queries/server-info.query.js';
+  import { getMyUserQuery } from '#lib/queries/user.query.js';
   import { handleShowUnseenReleases, handleShowWhatsNew } from '#lib/release.js';
   import {
     AppShell,
@@ -22,14 +26,16 @@
   import { mdiInformationOutline, mdiMenu, mdiPartyPopper } from '@mdi/js';
   import { onMount, type Snippet } from 'svelte';
   import { MediaQuery } from 'svelte/reactivity';
-  import type { LayoutData } from './$types.js';
 
   type Props = {
-    data: LayoutData;
     children?: Snippet;
   };
 
-  let { data, children }: Props = $props();
+  let { children }: Props = $props();
+
+  const user = createPreloadedQuery(getMyUserQuery);
+  const about = createPreloadedQuery(getServerAboutQuery);
+  const inboxCount = createPreloadedQuery(getInboxCountQuery);
 
   const isWide = new MediaQuery(Constants.WideScreenQuery);
   let isMenuOpen = $state(false);
@@ -40,7 +46,7 @@
   });
 
   onMount(() => {
-    void handleShowUnseenReleases(data.about.version);
+    void handleShowUnseenReleases(about.data.version);
   });
 
   const isCurrent = (paths: string[]) => () =>
@@ -48,7 +54,7 @@
 
   const handleShowAbout = () => {
     isMenuOpen = false;
-    void modalManager.show(AboutModal, { about: data.about });
+    void modalManager.show(AboutModal, { about: about.data });
   };
 
   const handleShowReleases = () => {
@@ -89,7 +95,7 @@
     </div>
     <div class="flex items-center gap-2">
       <ThemeSwitcher />
-      <UserMenu user={data.user} />
+      <UserMenu user={user.data} />
     </div>
   </AppShellHeader>
   <AppShellSidebar open={isSidebarOpen} border={!isWide.current} class={isSidebarOpen ? '' : 'invisible'}>
@@ -98,14 +104,14 @@
         {#each Constants.Sections as { href, title, icon, paths } (href)}
           <div class="relative">
             <NavbarItem {href} {title} {icon} isActive={isCurrent(paths)} />
-            {#if href === Constants.InboxPath && data.inboxCount > 0}
+            {#if href === Constants.InboxPath && inboxCount.data > 0}
               <Badge
                 size="small"
                 color="primary"
                 shape="round"
                 class="pointer-events-none absolute inset-e-4 top-1/2 -translate-y-1/2"
               >
-                {data.inboxCount}
+                {inboxCount.data}
               </Badge>
             {/if}
           </div>
@@ -116,7 +122,7 @@
           {@render sidebarButton("What's new", mdiPartyPopper, handleShowReleases)}
           {@render sidebarButton('About', mdiInformationOutline, handleShowAbout)}
         </div>
-        <AppStatus connected={live.connected} version={data.about.version} />
+        <AppStatus connected={live.connected} version={about.data.version} />
       </div>
     </nav>
   </AppShellSidebar>

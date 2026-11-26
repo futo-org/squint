@@ -14,9 +14,6 @@ import type { BuildFilter } from './filter.js';
 import type { Screenshot } from './screens.js';
 
 export const Constants = {
-  Api: {
-    Prefix: 'api',
-  },
   DayMs: 86_400_000,
   IsoDateLength: 10,
   Chart: { Height: 96, PaddingX: 6, PaddingY: 10, MarkerRadius: 4, TooltipMargin: 56 },

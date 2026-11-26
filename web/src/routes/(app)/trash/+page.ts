@@ -1,16 +1,16 @@
 import { toBuildFilter } from '#lib/filter.js';
-import { searchBuilds, searchProjects } from '@futo-org/squint-sdk';
+import { searchBranchesQuery, searchBuildsQuery } from '#lib/queries/build.query.js';
+import { queryClient } from '#lib/queries/client.js';
+import { searchProjectsQuery } from '#lib/queries/project.query.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch, url }) => {
+export const load = (async ({ url }) => {
   const { review: _review, ...filter } = toBuildFilter(url.searchParams);
-  const [projects, builds, allBuilds] = await Promise.all([
-    searchProjects({}, { fetch }),
-    searchBuilds({ ...filter, isTrashed: true }, { fetch }),
-    searchBuilds({ isTrashed: true }, { fetch }),
+  await Promise.all([
+    queryClient.query(searchProjectsQuery()),
+    queryClient.query(searchBuildsQuery({ ...filter, isTrashed: true })),
+    queryClient.query(searchBranchesQuery({ isTrashed: true })),
   ]);
-  const branches = [...new Set(allBuilds.map(({ branch }) => branch))].toSorted((a, b) => a.localeCompare(b));
-  const projectNames = Object.fromEntries(projects.map(({ id, name }) => [id, name]));
 
-  return { builds, filter, branches, projectNames };
+  return { filter };
 }) satisfies PageLoad;

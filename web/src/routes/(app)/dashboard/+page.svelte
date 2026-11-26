@@ -5,21 +5,24 @@
   import { Constants } from '#lib/constants.js';
   import { getChange, getTrend } from '#lib/dashboard.js';
   import { formatDay, formatNumber, formatSigned } from '#lib/format.js';
+  import { getInboxCountQuery } from '#lib/queries/build.query.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getDashboardQuery } from '#lib/queries/dashboard.query.js';
+  import { searchProjectsQuery } from '#lib/queries/project.query.js';
   import { Heading, Text } from '@immich/ui';
-  import type { PageData } from './$types.js';
 
-  type Props = { data: PageData };
-
-  const { data }: Props = $props();
+  const dashboard = createPreloadedQuery(getDashboardQuery);
+  const projects = createPreloadedQuery(() => searchProjectsQuery());
+  const inboxCount = createPreloadedQuery(getInboxCountQuery);
 
   const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
 
-  const screenshotCount = $derived(sum(data.projects.map((project) => project.screenshotCount)));
-  const openPullRequestCount = $derived(sum(data.projects.map((project) => project.openPullRequestCount)));
+  const screenshotCount = $derived(sum(projects.data.map((project) => project.screenshotCount)));
+  const openPullRequestCount = $derived(sum(projects.data.map((project) => project.openPullRequestCount)));
 
   const rows = $derived(
-    data.projects.map((project) => {
-      const history = data.dashboard.history.filter(({ projectId }) => projectId === project.id);
+    projects.data.map((project) => {
+      const history = dashboard.data.history.filter(({ projectId }) => projectId === project.id);
       const points = getTrend(history, new Date());
 
       return { project, points, change: getChange(points) };
@@ -34,8 +37,8 @@
 
 <BreadcrumbPage breadcrumbs={[{ title: 'Dashboard' }]}>
   <dl class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-    <StatTile label="Projects" value={data.projects.length} href="/" />
-    <StatTile label="Need review" value={data.inboxCount} href="/inbox" />
+    <StatTile label="Projects" value={projects.data.length} href="/" />
+    <StatTile label="Need review" value={inboxCount.data} href="/inbox" />
     <StatTile label="Open pull requests" value={openPullRequestCount} />
     <StatTile label="Screenshots on main" value={screenshotCount} />
   </dl>

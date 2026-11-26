@@ -1,11 +1,12 @@
 import { findProjectOrRedirect } from '#lib/load.js';
-import { searchScreens } from '@futo-org/squint-sdk';
+import { queryClient } from '#lib/queries/client.js';
+import { searchScreensQuery } from '#lib/queries/screen.query.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch, params, url }) => {
-  const project = await findProjectOrRedirect(params.id, fetch);
+export const load = (async ({ params, url }) => {
+  await findProjectOrRedirect(params.id);
   const query = url.searchParams.get('query')?.trim() || undefined;
-  const screens = await searchScreens({ projectId: params.id, query }, { fetch });
+  await queryClient.query(searchScreensQuery({ projectId: params.id, query }));
 
-  return { project, screens, query };
+  return { projectId: params.id, query };
 }) satisfies PageLoad;

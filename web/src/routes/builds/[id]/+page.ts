@@ -1,7 +1,10 @@
 import { findOrRedirect } from '#lib/load.js';
-import { getBuild } from '@futo-org/squint-sdk';
+import { getBuildQuery } from '#lib/queries/build.query.js';
+import { queryClient } from '#lib/queries/client.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch, params }) => ({
-  build: await findOrRedirect(() => getBuild({ id: params.id }, { fetch }), '/'),
-})) satisfies PageLoad;
+export const load = (async ({ params }) => {
+  await findOrRedirect(() => queryClient.query(getBuildQuery(params.id)), '/');
+
+  return { id: params.id };
+}) satisfies PageLoad;

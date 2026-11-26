@@ -1,4 +1,4 @@
-import { invalidate, invalidateAll } from '$app/navigation';
+import { queryClient } from '#lib/queries/client.js';
 import { io, type Socket } from 'socket.io-client';
 import { Constants } from './constants.js';
 import { isAffected } from './live-changes.js';
@@ -19,7 +19,7 @@ class LiveConnection {
     this.#socket.on('connect', () => this.#handleConnect());
     this.#socket.on('disconnect', () => (this.connected = false));
     this.#socket.on(Constants.Live.ChangeEvent, ({ resource }: ResourceChange) => {
-      void invalidate((url) => isAffected(url, resource));
+      void queryClient.invalidateQueries({ predicate: ({ queryKey }) => isAffected(queryKey, resource) });
     });
   }
 
@@ -33,7 +33,7 @@ class LiveConnection {
   #handleConnect() {
     this.connected = true;
     if (this.#hasConnected) {
-      void invalidateAll();
+      void queryClient.invalidateQueries();
     }
 
     this.#hasConnected = true;

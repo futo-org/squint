@@ -1,12 +1,11 @@
 <script lang="ts">
   import BreadcrumbPage from '#lib/components/BreadcrumbPage.svelte';
   import UserAvatar from '#lib/components/UserAvatar.svelte';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getMyUserQuery } from '#lib/queries/user.query.js';
   import { Badge, Heading, Text, ThemeSwitcher } from '@immich/ui';
-  import type { PageData } from './$types.js';
 
-  type Props = { data: PageData };
-
-  const { data }: Props = $props();
+  const user = createPreloadedQuery(getMyUserQuery);
 </script>
 
 <svelte:head>
@@ -17,13 +16,13 @@
   <section class="flex flex-col gap-3 rounded-xl border p-4">
     <Heading size="tiny" tag="h3">Account</Heading>
     <div class="flex items-center gap-4">
-      <UserAvatar user={data.user} size="large" />
+      <UserAvatar user={user.data} size="large" />
       <div class="flex min-w-0 flex-col gap-1">
-        <span class="truncate font-medium text-black dark:text-white">{data.user.name}</span>
-        <span class="truncate text-sm text-muted">{data.user.email}</span>
+        <span class="truncate font-medium text-black dark:text-white">{user.data.name}</span>
+        <span class="truncate text-sm text-muted">{user.data.email}</span>
       </div>
       <span class="grow"></span>
-      <Badge size="small">{data.user.role}</Badge>
+      <Badge size="small">{user.data.role}</Badge>
     </div>
     <Text size="small" color="muted">
       Your name, email, picture and role come from FUTO SSO and update the next time you sign in.

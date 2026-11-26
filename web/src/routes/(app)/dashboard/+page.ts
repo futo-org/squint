@@ -1,8 +1,8 @@
-import { getDashboard, searchProjects } from '@futo-org/squint-sdk';
+import { queryClient } from '#lib/queries/client.js';
+import { getDashboardQuery } from '#lib/queries/dashboard.query.js';
+import { searchProjectsQuery } from '#lib/queries/project.query.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch }) => {
-  const [dashboard, projects] = await Promise.all([getDashboard({ fetch }), searchProjects({}, { fetch })]);
-
-  return { dashboard, projects };
+export const load = (async () => {
+  await Promise.all([queryClient.query(getDashboardQuery()), queryClient.query(searchProjectsQuery())]);
 }) satisfies PageLoad;
