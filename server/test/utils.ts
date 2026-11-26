@@ -7,6 +7,7 @@ import { createPostgres } from '@immich/sql-tools';
 import { Kysely } from 'kysely';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { type Mock, vi } from 'vitest';
+import { SquintEnvironment } from 'src/enum.js';
 import { configureApp } from 'src/app.common.js';
 import type { CiAuthDto } from 'src/dtos/auth.dto.js';
 import { AuthGuard } from 'src/middleware/auth.guard.js';
@@ -39,6 +40,7 @@ export type ControllerContext = {
 };
 
 export const newEnv = (overrides: Partial<EnvData> = {}): EnvData => ({
+  environment: SquintEnvironment.Testing,
   port: 0,
   build: {},
   database: { url: '' },

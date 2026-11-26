@@ -4,6 +4,7 @@ services:
   server:
     build: .
     environment:
+      SQUINT_ENV: development
       SQUINT_DB_URL: postgres://postgres:postgres@database:5432/squint
       SQUINT_S3_ENDPOINT: http://storage:9000
       SQUINT_S3_BUCKET: squint

@@ -1,4 +1,5 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { SentryExceptionCaptured } from '@sentry/nestjs';
 import type { Response } from 'express';
 import { LoggingRepository } from 'src/repositories/logging.repository.js';
 
@@ -6,6 +7,7 @@ import { LoggingRepository } from 'src/repositories/logging.repository.js';
 export class GlobalExceptionFilter implements ExceptionFilter<Error> {
   constructor(private logger: LoggingRepository) {}
 
+  @SentryExceptionCaptured()
   catch(error: Error, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
     if (response.headersSent) {

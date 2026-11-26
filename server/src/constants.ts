@@ -9,6 +9,9 @@ export const Constants = {
     Version: (createRequire(import.meta.url)('../package.json') as { version: string }).version,
     RepositoryUrl: 'https://github.com/futo-org/squint',
   },
+  ErrorReporting: {
+    FlushTimeoutMs: 2000,
+  },
   Release: {
     NoteKinds: new Map([
       ['feat', ReleaseNoteKind.Feature],

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { join } from 'node:path';
+import { SquintEnvironment } from 'src/enum.js';
 import z from 'zod';
 
 const HttpUrlSchema = z.url({ protocol: /^https?$/ });
@@ -8,6 +9,7 @@ const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
 
 const EnvSchema = z.object({
+  SQUINT_ENV: z.enum(SquintEnvironment).default(SquintEnvironment.Production),
   SQUINT_DB_URL: z.url({ protocol: /^postgres(ql)?$/ }).default('postgres://postgres:postgres@localhost:5432/squint'),
   SQUINT_HOST: optional(z.string()),
   SQUINT_PORT: z.coerce.number().int().min(0).max(65_535).default(3000),
@@ -30,6 +32,7 @@ const EnvSchema = z.object({
 });
 
 export type EnvData = {
+  environment: SquintEnvironment;
   host?: string;
   port: number;
   build: { commit?: string; date?: Date };
@@ -67,6 +70,7 @@ export class ConfigRepository {
     const env = result.data;
 
     return {
+      environment: env.SQUINT_ENV,
       host: env.SQUINT_HOST,
       port: env.SQUINT_PORT,
       build: {

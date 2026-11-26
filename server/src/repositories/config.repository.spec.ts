@@ -1,3 +1,4 @@
+import { SquintEnvironment } from 'src/enum.js';
 import { ConfigRepository } from 'src/repositories/config.repository.js';
 
 const required = {
@@ -28,6 +29,7 @@ describe(ConfigRepository.name, () => {
       SQUINT_BUILD_COMMIT: undefined,
       SQUINT_BUILD_DATE: undefined,
       SQUINT_CI_OWNERS: undefined,
+      SQUINT_ENV: undefined,
       ...required,
     });
   });
@@ -51,7 +53,20 @@ describe(ConfigRepository.name, () => {
         },
         network: { trustedProxies: ['loopback', 'linklocal', 'uniquelocal'] },
         github: { owners: ['futo-org', 'immich-app'] },
+        environment: SquintEnvironment.Production,
       });
+    });
+
+    it('reads the environment', () => {
+      stubEnv({ SQUINT_ENV: 'development' });
+
+      expect(sut.getEnv().environment).toBe(SquintEnvironment.Development);
+    });
+
+    it('refuses an unknown environment', () => {
+      stubEnv({ SQUINT_ENV: 'staging' });
+
+      expect(() => sut.getEnv()).toThrow('SQUINT_ENV');
     });
 
     it('reads the owners allowed to publish', () => {
