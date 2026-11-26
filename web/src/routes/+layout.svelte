@@ -1,7 +1,9 @@
 <script lang="ts">
   import '#lib/app.css';
   import { live } from '#lib/live.svelte.js';
+  import { queryClient } from '#lib/queries/client.js';
   import { TooltipProvider } from '@immich/ui';
+  import { QueryClientProvider } from '@tanstack/svelte-query';
   import { onMount, type Snippet } from 'svelte';
 
   type Props = {
@@ -17,6 +19,8 @@
   });
 </script>
 
-<TooltipProvider>
-  {@render children?.()}
-</TooltipProvider>
+<QueryClientProvider client={queryClient}>
+  <TooltipProvider>
+    {@render children?.()}
+  </TooltipProvider>
+</QueryClientProvider>

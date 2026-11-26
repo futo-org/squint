@@ -6,6 +6,9 @@
   import SearchBar from '#lib/components/SearchBar.svelte';
   import { Constants } from '#lib/constants.js';
   import { toSearch } from '#lib/filter.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getProjectQuery } from '#lib/queries/project.query.js';
+  import { searchScreensQuery } from '#lib/queries/screen.query.js';
   import { Icon, Text } from '@immich/ui';
   import { mdiChevronRight } from '@mdi/js';
   import type { PageData } from './$types.js';
@@ -14,27 +17,30 @@
 
   const { data }: Props = $props();
 
-  const base = $derived(`/projects/${data.project.id}`);
+  const { projectId, query } = $derived(data);
+  const project = createPreloadedQuery(() => getProjectQuery(projectId));
+  const screens = createPreloadedQuery(() => searchScreensQuery({ projectId, query }));
+  const base = $derived(`/projects/${projectId}`);
 
   const handleSearch = (query?: string) =>
     goto(`${base}/screens${toSearch({ query })}`, { replace: true, reset: false });
 </script>
 
 <svelte:head>
-  <title>Screens - {data.project.name} - Squint</title>
+  <title>Screens - {project.data.name} - Squint</title>
 </svelte:head>
 
-<BreadcrumbPage breadcrumbs={[{ title: 'Projects', href: '/' }, { title: data.project.name }]}>
-  <Text size="small" color="muted" class="font-mono">{data.project.repository}</Text>
-  <ProjectTabs projectId={data.project.id} current="screens" />
-  <SearchBar query={data.query} placeholder="Screen name" onSearch={handleSearch} />
-  {#if data.screens.length === 0}
+<BreadcrumbPage breadcrumbs={[{ title: 'Projects', href: '/' }, { title: project.data.name }]}>
+  <Text size="small" color="muted" class="font-mono">{project.data.repository}</Text>
+  <ProjectTabs {projectId} current="screens" />
+  <SearchBar {query} placeholder="Screen name" onSearch={handleSearch} />
+  {#if screens.data.length === 0}
     <Text color="muted">
-      {data.query ? 'No screens match this search.' : 'No screenshots have been published on main yet.'}
+      {query ? 'No screens match this search.' : 'No screenshots have been published on main yet.'}
     </Text>
   {:else}
     <ul aria-label="Screens" class={Constants.ListClass}>
-      {#each data.screens as screen (screen.name)}
+      {#each screens.data as screen (screen.name)}
         <li>
           <a
             href="{base}/history{toSearch({ screen: screen.name })}"

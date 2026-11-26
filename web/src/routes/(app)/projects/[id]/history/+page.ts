@@ -1,15 +1,16 @@
 import { findOrRedirect, findProjectOrRedirect } from '#lib/load.js';
-import { searchScreenshotVersions } from '@futo-org/squint-sdk';
+import { queryClient } from '#lib/queries/client.js';
+import { searchScreenshotVersionsQuery } from '#lib/queries/screen.query.js';
 import type { PageLoad } from './$types.js';
 
-export const load = (async ({ fetch, params, url }) => {
-  const project = await findProjectOrRedirect(params.id, fetch);
+export const load = (async ({ params, url }) => {
+  await findProjectOrRedirect(params.id);
   const name = url.searchParams.get('screen') ?? '';
-  const versions = await findOrRedirect(async () => {
-    const versions = name ? await searchScreenshotVersions({ projectId: params.id, name }, { fetch }) : [];
+  await findOrRedirect(async () => {
+    const versions = name ? await queryClient.query(searchScreenshotVersionsQuery({ projectId: params.id, name })) : [];
 
     return versions.length > 0 ? versions : undefined;
   }, `/projects/${params.id}/screens`);
 
-  return { project, name, versions };
+  return { projectId: params.id, name };
 }) satisfies PageLoad;

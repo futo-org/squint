@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { queryClient } from '#lib/queries/client.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { load as loadHistory } from './(app)/projects/[id]/history/+page.js';
 import { load as loadScreens } from './(app)/projects/[id]/screens/+page.js';
 import { load as loadProject } from './(app)/projects/[id]/+page.js';
@@ -9,12 +10,13 @@ const project = { id: projectId, repository: 'immich-app/immich', name: 'web' };
 
 type Route = (path: string) => Response;
 
-const newEvent = (params: Record<string, string>, href: string, route: Route) =>
-  ({
-    params,
-    url: new URL(href, 'https://squint.futo.org'),
-    fetch: async (input: RequestInfo | URL) => route(new URL(String(input), 'https://squint.futo.org').pathname),
-  }) as never;
+const newEvent = (params: Record<string, string>, href: string, route: Route) => {
+  vi.stubGlobal('fetch', async (input: RequestInfo | URL) =>
+    route(new URL(String(input), 'https://squint.futo.org').pathname),
+  );
+
+  return { params, url: new URL(href, 'https://squint.futo.org') } as never;
+};
 
 const invalid = () => Response.json({ message: 'Validation failed' }, { status: 400 });
 const missing = () => Response.json({ message: 'Not Found' }, { status: 404 });
@@ -22,6 +24,9 @@ const found = (path: string) => Response.json(path.endsWith('/projects') ? [proj
 const empty = () => Response.json([]);
 
 describe('not found', () => {
+  beforeEach(() => queryClient.clear());
+  afterEach(() => vi.unstubAllGlobals());
+
   it.each([
     { title: 'malformed project id', route: invalid },
     { title: 'unknown project', route: empty },

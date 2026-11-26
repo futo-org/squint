@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto, invalidateAll } from '$app/navigation';
+  import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import BackBar from '#lib/components/BackBar.svelte';
   import IconToggleGroup from '#lib/components/IconToggleGroup.svelte';
@@ -9,6 +9,9 @@
   import ScreenshotView from '#lib/components/ScreenshotView.svelte';
   import { Constants } from '#lib/constants.js';
   import { formatPercent } from '#lib/format.js';
+  import { approveBuildScreenMutation, getBuildQuery, revokeBuildScreenMutation } from '#lib/queries/build.query.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getMyUserQuery } from '#lib/queries/user.query.js';
   import {
     getNextScreen,
     getNextToReview,
@@ -18,14 +21,7 @@
     pickVariant,
   } from '#lib/screens.js';
   import { Alert, Badge, Button, IconButton, Text } from '@immich/ui';
-  import {
-    approveBuildScreen,
-    BuildKind,
-    revokeBuildScreen,
-    ScreenshotStatus,
-    ScreenshotTheme,
-    UserRole,
-  } from '@futo-org/squint-sdk';
+  import { BuildKind, ScreenshotStatus, ScreenshotTheme, UserRole } from '@futo-org/squint-sdk';
   import {
     mdiCheckboxBlankOutline,
     mdiCheckboxMarked,
@@ -36,12 +32,18 @@
     mdiWeatherNight,
     mdiWeatherSunny,
   } from '@mdi/js';
+  import { createMutation } from '@tanstack/svelte-query';
   import type { PageData } from './$types.js';
 
   type Props = { data: PageData };
   type Mode = 'side-by-side' | 'slider';
 
   const { data }: Props = $props();
+
+  const build = createPreloadedQuery(() => getBuildQuery(data.id));
+  const user = createPreloadedQuery(getMyUserQuery);
+  const approve = createMutation(approveBuildScreenMutation);
+  const revoke = createMutation(revokeBuildScreenMutation);
 
   const modes: Array<{ value: Mode; label: string; icon: string }> = [
     { value: 'side-by-side', label: 'Side by side', icon: mdiImageMultipleOutline },
@@ -56,12 +58,12 @@
   let theme = $state(ScreenshotTheme.Light);
   let viewport = $state('desktop');
   let mode = $state<Mode>('side-by-side');
-  let isSaving = $state(false);
   let isDiffOn = $state(true);
   let isDiffPreviewed = $state(false);
 
-  const screens = $derived(groupScreens(data.build.screenshots));
-  const unchangedCount = $derived(new Set(data.build.screenshots.map(({ name }) => name)).size - screens.length);
+  const isSaving = $derived(approve.isPending || revoke.isPending);
+  const screens = $derived(groupScreens(build.data.screenshots));
+  const unchangedCount = $derived(new Set(build.data.screenshots.map(({ name }) => name)).size - screens.length);
   const selected = $derived(page.url.searchParams.get('screen'));
   const screen = $derived(
     screens.find(({ name }) => name === selected) ?? screens.find(({ pending }) => pending > 0) ?? screens[0],
@@ -70,17 +72,17 @@
   const screenshot = $derived(screen && pickVariant(screen, { theme, viewport }));
   const viewports = $derived([...new Set(screen?.variants.map((variant) => variant.viewport))]);
   const hasThemes = $derived(new Set(screen?.variants.map((variant) => variant.theme)).size > 1);
-  const isApprover = $derived(data.user.role === UserRole.Approver);
+  const isApprover = $derived(user.data.role === UserRole.Approver);
   const canApprove = $derived(isApprover && !!screen);
   const approval = $derived(screen && getScreenApproval(screen));
   const canCompare = $derived(!!screenshot && isChanged(screenshot) && !!screenshot.baselineSha256);
   const label = $derived(
-    data.build.pullRequest ? `#${data.build.pullRequest.number}` : (data.build.release ?? data.build.kind),
+    build.data.pullRequest ? `#${build.data.pullRequest.number}` : (build.data.release ?? build.data.kind),
   );
 
-  const description = $derived(`${label} · ${data.build.branch} · ${data.build.commit.slice(0, 8)}`);
+  const description = $derived(`${label} · ${build.data.branch} · ${build.data.commit.slice(0, 8)}`);
 
-  const handleBack = () => goto(`/projects/${data.build.projectId}`);
+  const handleBack = () => goto(`/projects/${build.data.projectId}`);
 
   const open = (name: string) => goto(`?screen=${encodeURIComponent(name)}`, { replace: true, reset: false });
 
@@ -90,16 +92,10 @@
     }
 
     const next = approved ? getNextToReview(screens, screen.name) : undefined;
-    isSaving = true;
-    try {
-      const { id } = data.build;
-      await (approved
-        ? approveBuildScreen({ id, approvalDto: { name: screen.name } })
-        : revokeBuildScreen({ id, name: screen.name }));
-      await invalidateAll();
-    } finally {
-      isSaving = false;
-    }
+    const { id } = build.data;
+    await (approved
+      ? approve.mutateAsync([{ id, approvalDto: { name: screen.name } }])
+      : revoke.mutateAsync([{ id, name: screen.name }]));
 
     if (next) {
       await open(next.name);
@@ -135,7 +131,7 @@
 </svelte:head>
 
 {#snippet badge()}
-  <Badge size="small" color={data.build.kind === BuildKind.Main ? 'secondary' : 'primary'}>{label}</Badge>
+  <Badge size="small" color={build.data.kind === BuildKind.Main ? 'secondary' : 'primary'}>{label}</Badge>
 {/snippet}
 
 {#if !screen || !screenshot}
@@ -205,7 +201,7 @@
       {#if screenshot.status !== ScreenshotStatus.New}
         <div class={Constants.ToggleGroupClass}>
           <IconButton
-            href="/projects/{data.build.projectId}/history?screen={encodeURIComponent(screen.name)}"
+            href="/projects/{build.data.projectId}/history?screen={encodeURIComponent(screen.name)}"
             icon={mdiHistory}
             aria-label="Screen history"
             title="Screen history"
@@ -235,9 +231,9 @@
     {#snippet sidebar({ onClose }: { onClose?: () => void })}
       <ReviewTree {screens} current={screen.name} {unchangedCount} {onClose} />
     {/snippet}
-    {#if data.build.expiresAt}
+    {#if build.data.expiresAt}
       <Alert color="warning" shape="rectangle" size="small" class={Constants.BannerClass}>
-        <span>In the trash, its screenshots will be deleted <RelativeTime date={data.build.expiresAt} /></span>
+        <span>In the trash, its screenshots will be deleted <RelativeTime date={build.data.expiresAt} /></span>
       </Alert>
     {/if}
     {#if approval}

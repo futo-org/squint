@@ -8,6 +8,9 @@
   import { Constants } from '#lib/constants.js';
   import { type BuildFilter, toSearch } from '#lib/filter.js';
   import BuildFilterModal from '#lib/modals/BuildFilterModal.svelte';
+  import { searchBranchesQuery, searchBuildsQuery } from '#lib/queries/build.query.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { getProjectQuery } from '#lib/queries/project.query.js';
   import { modalManager, Text } from '@immich/ui';
   import { mdiSourceBranch } from '@mdi/js';
   import type { PageData } from './$types.js';
@@ -16,14 +19,17 @@
 
   const { data }: Props = $props();
 
-  const { filter } = $derived(data);
+  const { projectId, filter } = $derived(data);
+  const project = createPreloadedQuery(() => getProjectQuery(projectId));
+  const builds = createPreloadedQuery(() => searchBuildsQuery({ projectId, ...filter }));
+  const branches = createPreloadedQuery(() => searchBranchesQuery({ projectId }));
   const isFiltered = $derived(Object.keys(filter).length > 0);
 
   const applyFilter = (change: BuildFilter) =>
-    goto(`/projects/${data.project.id}${toSearch({ ...filter, ...change })}`, { replace: true, reset: false });
+    goto(`/projects/${projectId}${toSearch({ ...filter, ...change })}`, { replace: true, reset: false });
 
   const handleFilters = async () => {
-    const result = await modalManager.show(BuildFilterModal, { filter, branches: data.branches });
+    const result = await modalManager.show(BuildFilterModal, { filter, branches: branches.data });
     if (result) {
       await applyFilter(result);
     }
@@ -43,12 +49,12 @@
 </script>
 
 <svelte:head>
-  <title>{data.project.name} - Squint</title>
+  <title>{project.data.name} - Squint</title>
 </svelte:head>
 
-<BreadcrumbPage breadcrumbs={[{ title: 'Projects', href: '/' }, { title: data.project.name }]}>
-  <Text size="small" color="muted" class="font-mono">{data.project.repository}</Text>
-  <ProjectTabs projectId={data.project.id} current="builds" />
+<BreadcrumbPage breadcrumbs={[{ title: 'Projects', href: '/' }, { title: project.data.name }]}>
+  <Text size="small" color="muted" class="font-mono">{project.data.repository}</Text>
+  <ProjectTabs {projectId} current="builds" />
   <SearchBar
     query={filter.query}
     placeholder="Branch, commit or pull request"
@@ -56,11 +62,11 @@
     onFilters={handleFilters}
   />
   <FilterChips {chips} />
-  {#if data.builds.length === 0}
+  {#if builds.data.length === 0}
     <Text color="muted">{isFiltered ? 'No builds match these filters.' : 'No builds yet.'}</Text>
   {:else}
     <ul aria-label="Builds" class={Constants.ListClass}>
-      {#each data.builds as build (build.id)}
+      {#each builds.data as build (build.id)}
         <li><BuildRow {build} /></li>
       {/each}
     </ul>

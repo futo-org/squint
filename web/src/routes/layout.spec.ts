@@ -1,18 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { queryClient } from '#lib/queries/client.js';
+import { getMyUserQuery } from '#lib/queries/user.query.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { load } from './+layout.js';
 
-type LoadEvent = Parameters<typeof load>[0];
+const newEvent = (response: Response, href = 'https://squint.futo.org/') => {
+  vi.stubGlobal('fetch', async () => response);
 
-const newEvent = (response: Response, href = 'https://squint.futo.org/') =>
-  ({ fetch: async () => response, url: new URL(href) }) as unknown as LoadEvent;
+  return { url: new URL(href) } as unknown as Parameters<typeof load>[0];
+};
 
 describe('layout load', () => {
-  it('returns the signed in user', async () => {
+  beforeEach(() => queryClient.clear());
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('loads the signed in user', async () => {
     const user = { id: 'user-1', email: 'approver@immich.app', name: 'Approver', role: 'approver', avatarUrl: null };
 
-    const result = await load(newEvent(Response.json(user)));
+    await load(newEvent(Response.json(user)));
 
-    expect(result).toEqual({ user });
+    expect(queryClient.getQueryData(getMyUserQuery().queryKey)).toEqual(user);
   });
 
   it('sends a signed out visitor to login and back to the same page', async () => {

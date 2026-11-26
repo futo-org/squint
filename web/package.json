@@ -30,6 +30,7 @@
     "@immich/ui": "^0.94.0",
     "@futo-org/squint-sdk": "workspace:*",
     "@mdi/js": "^7.4.47",
+    "@tanstack/svelte-query": "^6.3.2",
     "socket.io-client": "^4.8.4"
   },
   "imports": {

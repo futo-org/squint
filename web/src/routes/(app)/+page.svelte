@@ -6,6 +6,8 @@
   import { Constants } from '#lib/constants.js';
   import { type ProjectFilter, toSearch } from '#lib/filter.js';
   import ProjectFilterModal from '#lib/modals/ProjectFilterModal.svelte';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { searchProjectsQuery } from '#lib/queries/project.query.js';
   import {
     Badge,
     Button,
@@ -22,20 +24,23 @@
   import type { PageData } from './$types.js';
 
   type Props = { data: PageData };
-  type Project = PageData['projects'][number];
+  type Project = (typeof projects.data)[number];
 
   const { data }: Props = $props();
 
   const formatNumber = new Intl.NumberFormat();
 
   const { filter } = $derived(data);
+  const projects = createPreloadedQuery(() => searchProjectsQuery(filter));
+  const allProjects = createPreloadedQuery(() => searchProjectsQuery());
+  const repositories = $derived([...new Set(allProjects.data.map(({ repository }) => repository))]);
   const isFiltered = $derived(Object.keys(filter).length > 0);
 
   const applyFilter = (change: ProjectFilter) =>
     goto(`/${toSearch({ ...filter, ...change })}`, { replace: true, reset: false });
 
   const handleFilters = async () => {
-    const result = await modalManager.show(ProjectFilterModal, { filter, repositories: data.repositories });
+    const result = await modalManager.show(ProjectFilterModal, { filter, repositories });
     if (result) {
       await applyFilter(result);
     }
@@ -80,13 +85,13 @@
     onFilters={handleFilters}
   />
   <FilterChips {chips} />
-  {#if data.projects.length === 0}
+  {#if projects.data.length === 0}
     <Text color="muted">
       {isFiltered ? 'No projects match these filters.' : 'No project has published screenshots yet.'}
     </Text>
   {:else}
     <ul aria-label="Projects" class={[Constants.ListClass, 'md:hidden']}>
-      {#each data.projects as project (project.id)}
+      {#each projects.data as project (project.id)}
         <li>
           <a href="/projects/{project.id}" class="flex items-center gap-3 py-3 ps-4 pe-3 hover:bg-light-200">
             <span class="flex min-w-0 flex-1 flex-col gap-1">
@@ -101,7 +106,7 @@
       {/each}
     </ul>
     <ul aria-label="Projects" class="hidden grid-cols-2 gap-4 md:grid xl:grid-cols-3">
-      {#each data.projects as project (project.id)}
+      {#each projects.data as project (project.id)}
         <li class="flex">
           <Card color="secondary">
             <CardHeader>

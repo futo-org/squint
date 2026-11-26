@@ -1,11 +1,8 @@
-import { getServerAbout, ReviewStatus, searchBuilds } from '@futo-org/squint-sdk';
+import { getInboxCountQuery } from '#lib/queries/build.query.js';
+import { queryClient } from '#lib/queries/client.js';
+import { getServerAboutQuery } from '#lib/queries/server-info.query.js';
 import type { LayoutLoad } from './$types.js';
 
-export const load = (async ({ fetch }) => {
-  const [about, inbox] = await Promise.all([
-    getServerAbout({ fetch }),
-    searchBuilds({ review: ReviewStatus.NeedsReview }, { fetch }),
-  ]);
-
-  return { about, inboxCount: inbox.length };
+export const load = (async () => {
+  await Promise.all([queryClient.query(getServerAboutQuery()), queryClient.query(getInboxCountQuery())]);
 }) satisfies LayoutLoad;

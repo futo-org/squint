@@ -7,6 +7,10 @@
   import { Constants } from '#lib/constants.js';
   import { type BuildFilter, toSearch } from '#lib/filter.js';
   import BuildFilterModal from '#lib/modals/BuildFilterModal.svelte';
+  import { searchBranchesQuery, searchBuildsQuery } from '#lib/queries/build.query.js';
+  import { createPreloadedQuery } from '#lib/queries/client.js';
+  import { searchProjectsQuery } from '#lib/queries/project.query.js';
+  import { ReviewStatus } from '@futo-org/squint-sdk';
   import { modalManager, Text } from '@immich/ui';
   import { mdiSourceBranch } from '@mdi/js';
   import type { PageData } from './$types.js';
@@ -15,6 +19,11 @@
 
   const { data }: Props = $props();
 
+  const builds = createPreloadedQuery(() => searchBuildsQuery(data.filter));
+  const branches = createPreloadedQuery(() => searchBranchesQuery({ review: ReviewStatus.NeedsReview }));
+  const projects = createPreloadedQuery(() => searchProjectsQuery());
+  const projectNames = $derived(Object.fromEntries(projects.data.map(({ id, name }) => [id, name])));
+
   const { query, branch } = $derived(data.filter);
 
   const applyFilter = (change: BuildFilter) =>
@@ -22,7 +31,7 @@
 
   const handleFilters = async () => {
     const filter = { query, branch };
-    const result = await modalManager.show(BuildFilterModal, { filter, branches: data.branches, fields: ['branch'] });
+    const result = await modalManager.show(BuildFilterModal, { filter, branches: branches.data, fields: ['branch'] });
     if (result) {
       await applyFilter(result);
     }
@@ -46,12 +55,12 @@
     onFilters={handleFilters}
   />
   <FilterChips {chips} />
-  {#if data.builds.length === 0}
+  {#if builds.data.length === 0}
     <Text color="muted">{query || branch ? 'Nothing matches these filters.' : 'Nothing needs review.'}</Text>
   {:else}
     <ul aria-label="Needs review" class={Constants.ListClass}>
-      {#each data.builds as build (build.id)}
-        <li><BuildRow {build} project={data.projectNames[build.projectId]} /></li>
+      {#each builds.data as build (build.id)}
+        <li><BuildRow {build} project={projectNames[build.projectId]} /></li>
       {/each}
     </ul>
   {/if}
